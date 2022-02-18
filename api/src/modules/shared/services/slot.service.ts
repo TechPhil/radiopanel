@@ -116,25 +116,25 @@ export class SlotService {
 
 	private async checkSlotLength(slot: Partial<Slot>) {
 		const slotLength = (slot.end - slot.start) / 60;
-		const tenant = this.tenantService.findOne();
-		const minLength = (await tenant).settings.minimumSlotDuration || 30
-		const maxLength = (await tenant).settings.maximumSlotDuration || 1440
-		let length: number;
+		const tenant = await this.tenantService.findOne();
+		const minLength = tenant.settings.minimumSlotDuration || 30
+		const maxLength = tenant.settings.maximumSlotDuration || 1440
+		let error: boolean;
 		let msg: string;
 		if (slotLength < minLength) {
-			length = 1;
+			error = true;
 			msg = "This slot is too short";
 		} else if (slotLength > maxLength) {
-			length = 2;
+			error = true;
 			msg = "This slot is too long";
 		} else {
-			length = 0;
+			error = false;
 		}
 		return {
 			minLength,
 			maxLength,
 			slotLength,
-			error: length > 0 ? true : false,
+			error,
 			msg
 		};
 	}
